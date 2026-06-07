@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { BOARD_HEIGHT, BOARD_WIDTH, TETROMINOES } from './constants';
+import { describe, expect, it, vi } from 'vitest';
+import { BOARD_HEIGHT, BOARD_WIDTH, TETROMINOES, VISIBLE_QUEUE_SIZE } from './constants';
 import { createSeededRng, createSevenBag } from './random';
 import type { ActivePiece, Board } from './types';
 import {
@@ -165,13 +165,23 @@ describe('game reducer rules', () => {
   it('uses only the public game state shape', () => {
     expect(Object.keys(createInitialState(1)).sort()).toEqual([
       'active',
+      'bagSeed',
       'board',
       'canHold',
       'hold',
+      'nextIndex',
       'nextQueue',
       'phase',
       'stats'
     ]);
+  });
+
+  it('records deterministic queue stream metadata publicly', () => {
+    const state = createInitialState(1);
+
+    expect(state.bagSeed).toBe(1);
+    expect(state.nextIndex).toBe(VISIBLE_QUEUE_SIZE + 1);
+    expect(state.nextQueue).toHaveLength(VISIBLE_QUEUE_SIZE);
   });
 
   it('restarts as a fresh playing game with reset stats', () => {
@@ -201,5 +211,51 @@ describe('game reducer rules', () => {
     const rotated = gameReducer(playing, { type: 'rotate', direction: -1 });
 
     expect(rotated.active.rotation).toBe(3);
+  });
+
+  it('keeps matching seeds deterministic through identical hard drop, hold, and tick actions', () => {
+    const now = vi.spyOn(Date, 'now').mockImplementation(() => 1000);
+    const actions = [
+      { type: 'start' },
+      { type: 'hold' },
+      { type: 'hardDrop' },
+      { type: 'tick' },
+      { type: 'hardDrop' },
+      { type: 'hardDrop' }
+    ] as const;
+
+    const first = actions.reduce(gameReducer, createInitialState(7));
+    const second = actions.reduce(gameReducer, createInitialState(7));
+    now.mockRestore();
+
+    expect({
+      active: first.active,
+      nextQueue: first.nextQueue,
+      stats: first.stats,
+      phase: first.phase
+    }).toEqual({
+      active: second.active,
+      nextQueue: second.nextQueue,
+      stats: second.stats,
+      phase: second.phase
+    });
+  });
+
+  it('progresses the queue deterministically after enough locks without time refill', () => {
+    const now = vi.spyOn(Date, 'now').mockImplementation(() => 2000);
+    const lockActions = Array.from({ length: VISIBLE_QUEUE_SIZE + 3 }, () => ({
+      type: 'hardDrop' as const
+    }));
+
+    const first = lockActions.reduce(gameReducer, gameReducer(createInitialState(11), { type: 'start' }));
+    now.mockClear();
+    const second = lockActions.reduce(gameReducer, gameReducer(createInitialState(11), { type: 'start' }));
+    const dateCalls = now.mock.calls.length;
+    now.mockRestore();
+
+    expect(dateCalls).toBe(0);
+    expect(first.active).toEqual(second.active);
+    expect(first.nextQueue).toEqual(second.nextQueue);
+    expect(first.nextIndex).toBe(second.nextIndex);
   });
 });

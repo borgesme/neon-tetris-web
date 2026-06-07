@@ -27,6 +27,10 @@ export interface GameState {
   hold: PieceType | null;
   canHold: boolean;
   nextQueue: PieceType[];
+  /** Seed used for the deterministic seven-bag piece stream. */
+  bagSeed: number;
+  /** Stream index for the next piece to append to nextQueue. */
+  nextIndex: number;
   stats: GameStats;
 }
 
