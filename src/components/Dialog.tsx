@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 interface DialogProps {
@@ -8,6 +9,31 @@ interface DialogProps {
 }
 
 export function Dialog({ title, open, onClose, children }: DialogProps) {
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    closeButtonRef.current?.focus();
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocus?.focus();
+    };
+  }, [onClose, open]);
+
   if (!open) {
     return null;
   }
@@ -23,7 +49,7 @@ export function Dialog({ title, open, onClose, children }: DialogProps) {
       >
         <header className="dialog-header">
           <h2>{title}</h2>
-          <button type="button" aria-label="Close dialog" onClick={onClose}>
+          <button ref={closeButtonRef} type="button" aria-label="Close dialog" onClick={onClose}>
             Close
           </button>
         </header>
