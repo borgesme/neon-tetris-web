@@ -59,3 +59,15 @@ button {
   background: var(--panel);
   box-shadow: 0 0 28px rgba(34, 211, 238, 0.24);
 }
+
+.game-canvas {
+  display: block;
+  width: min(70vw, 420px);
+  max-width: 100%;
+  aspect-ratio: 10 / 20;
+  border: 2px solid var(--cyan);
+  border-radius: 8px;
+  background: #0b1020;
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.24);
+  touch-action: none;
+}
