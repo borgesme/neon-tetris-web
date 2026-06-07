@@ -12,7 +12,8 @@ export function createEmptyBoard(): Board {
 }
 
 export function getPieceCells(piece: ActivePiece): RenderCell[] {
-  return TETROMINOES[piece.type][piece.rotation % 4].map((point) => ({
+  const rotation = ((piece.rotation % 4) + 4) % 4;
+  return TETROMINOES[piece.type][rotation].map((point) => ({
     x: piece.position.x + point.x,
     y: piece.position.y + point.y,
     type: piece.type
@@ -34,7 +35,7 @@ export function isValidPosition(board: Board, piece: ActivePiece): boolean {
 export function mergePiece(board: Board, piece: ActivePiece): Board {
   const next = board.map((row) => [...row]);
   for (const cell of getPieceCells(piece)) {
-    if (cell.y >= 0 && cell.y < BOARD_HEIGHT) {
+    if (cell.x >= 0 && cell.x < BOARD_WIDTH && cell.y >= 0 && cell.y < BOARD_HEIGHT) {
       next[cell.y][cell.x] = cell.type;
     }
   }
@@ -42,7 +43,9 @@ export function mergePiece(board: Board, piece: ActivePiece): Board {
 }
 
 export function clearFullLines(board: Board): { board: Board; linesCleared: number } {
-  const remaining = board.filter((row) => row.some((cell) => cell === null));
+  const remaining = board
+    .filter((row) => row.some((cell) => cell === null))
+    .map((row) => [...row]);
   const linesCleared = BOARD_HEIGHT - remaining.length;
   const emptyRows = Array.from({ length: linesCleared }, () => Array<Cell>(BOARD_WIDTH).fill(null));
   return {

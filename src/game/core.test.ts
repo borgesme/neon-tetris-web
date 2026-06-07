@@ -61,6 +61,13 @@ describe('board operations', () => {
     expect(board[0][4]).toBeNull();
   });
 
+  it('ignores horizontally out-of-bounds cells when merging', () => {
+    const board = createEmptyBoard();
+    const piece: ActivePiece = { type: 'I', position: { x: 0, y: 0 }, rotation: 0 };
+    const merged = mergePiece(board, piece);
+    expect(Object.prototype.hasOwnProperty.call(merged[0], '-1')).toBe(false);
+  });
+
   it('clears full lines and inserts empty rows at the top', () => {
     const board: Board = createEmptyBoard();
     board[19] = Array.from({ length: 10 }, () => 'T');
@@ -68,6 +75,15 @@ describe('board operations', () => {
     expect(result.linesCleared).toBe(1);
     expect(result.board[0].every((cell) => cell === null)).toBe(true);
     expect(result.board[19].every((cell) => cell === null)).toBe(true);
+  });
+
+  it('clones surviving rows when clearing full lines', () => {
+    const board: Board = createEmptyBoard();
+    board[18][0] = 'I';
+    board[19] = Array.from({ length: 10 }, () => 'T');
+    const result = clearFullLines(board);
+    result.board[19][0] = 'O';
+    expect(board[18][0]).toBe('I');
   });
 
   it('computes a ghost piece landing position', () => {
@@ -86,6 +102,16 @@ describe('piece cells', () => {
       { x: 5, y: 3, type: 'O' },
       { x: 4, y: 4, type: 'O' },
       { x: 5, y: 4, type: 'O' }
+    ]);
+  });
+
+  it('normalizes negative rotations', () => {
+    const piece: ActivePiece = { type: 'L', position: { x: 4, y: 4 }, rotation: -1 };
+    expect(getPieceCells(piece)).toEqual([
+      { x: 3, y: 3, type: 'L' },
+      { x: 4, y: 3, type: 'L' },
+      { x: 4, y: 4, type: 'L' },
+      { x: 4, y: 5, type: 'L' }
     ]);
   });
 });
