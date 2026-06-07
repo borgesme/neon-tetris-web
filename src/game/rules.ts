@@ -3,15 +3,11 @@ import { clearFullLines, createEmptyBoard, isValidPosition, mergePiece } from '.
 import { createSeededRng, createSevenBag } from './random';
 import type { ActivePiece, GameAction, GameState, PieceType } from './types';
 
-type InternalGameState = GameState & {
-  seed: number;
-  nextIndex: number;
-};
+const WALL_KICK_OFFSETS = [0, -1, 1, -2, 2] as const;
 
 interface PulledPiece {
   piece: PieceType;
   nextQueue: PieceType[];
-  nextIndex: number;
 }
 
 function drawPieces(seed: number, count: number): PieceType[] {
@@ -19,20 +15,8 @@ function drawPieces(seed: number, count: number): PieceType[] {
   return Array.from({ length: count }, () => bag.next());
 }
 
-function withQueueMeta(state: GameState, seed: number, nextIndex: number): InternalGameState {
-  return {
-    ...state,
-    seed,
-    nextIndex
-  };
-}
-
-function getSeed(state: GameState): number {
-  return (state as Partial<InternalGameState>).seed ?? 0;
-}
-
-function getNextIndex(state: GameState): number {
-  return (state as Partial<InternalGameState>).nextIndex ?? 0;
+function normalizeRotation(rotation: number): number {
+  return ((rotation % 4) + 4) % 4;
 }
 
 function spawnPiece(type: PieceType): ActivePiece {
@@ -43,20 +27,17 @@ function spawnPiece(type: PieceType): ActivePiece {
   };
 }
 
-function createQueue(seed: number, startIndex = 0): PieceType[] {
-  return drawPieces(seed, startIndex + VISIBLE_QUEUE_SIZE).slice(startIndex);
+function createQueue(seed = Date.now(), size = VISIBLE_QUEUE_SIZE): PieceType[] {
+  return drawPieces(seed, size);
 }
 
 function pullNext(state: GameState): PulledPiece {
-  const seed = getSeed(state);
-  const currentIndex = getNextIndex(state);
-  const piece = state.nextQueue[0] ?? drawPieces(seed, currentIndex + 1)[currentIndex];
-  const nextIndex = currentIndex + 1;
+  const [piece = createQueue(Date.now(), 1)[0], ...remaining] = state.nextQueue;
+  const refillCount = Math.max(0, VISIBLE_QUEUE_SIZE - remaining.length);
 
   return {
     piece,
-    nextQueue: createQueue(seed, nextIndex),
-    nextIndex
+    nextQueue: [...remaining, ...createQueue(Date.now(), refillCount)]
   };
 }
 
@@ -81,19 +62,15 @@ function lockPiece(state: GameState, dropScore = 0): GameState {
   const active = spawnPiece(next.piece);
   const phase = isValidPosition(cleared.board, active) ? 'playing' : 'gameOver';
 
-  return withQueueMeta(
-    {
-      ...state,
-      phase,
-      board: cleared.board,
-      active,
-      nextQueue: next.nextQueue,
-      canHold: true,
-      stats
-    },
-    getSeed(state),
-    next.nextIndex
-  );
+  return {
+    ...state,
+    phase,
+    board: cleared.board,
+    active,
+    nextQueue: next.nextQueue,
+    canHold: true,
+    stats
+  };
 }
 
 function moveBy(state: GameState, dx: number, dy: number): GameState {
@@ -116,19 +93,27 @@ function moveBy(state: GameState, dx: number, dy: number): GameState {
 }
 
 function rotateBy(state: GameState, direction: -1 | 1): GameState {
-  const active = {
-    ...state.active,
-    rotation: state.active.rotation + direction
-  };
+  const rotation = normalizeRotation(state.active.rotation + direction);
 
-  if (!isValidPosition(state.board, active)) {
-    return state;
+  for (const dx of WALL_KICK_OFFSETS) {
+    const active = {
+      ...state.active,
+      position: {
+        ...state.active.position,
+        x: state.active.position.x + dx
+      },
+      rotation
+    };
+
+    if (isValidPosition(state.board, active)) {
+      return {
+        ...state,
+        active
+      };
+    }
   }
 
-  return {
-    ...state,
-    active
-  };
+  return state;
 }
 
 function hardDrop(state: GameState): GameState {
@@ -152,30 +137,29 @@ function hardDrop(state: GameState): GameState {
 }
 
 export function createInitialState(seed = Date.now()): GameState {
-  const firstPieces = drawPieces(seed, VISIBLE_QUEUE_SIZE + 1);
+  const firstPieces = createQueue(seed, VISIBLE_QUEUE_SIZE + 1);
 
-  return withQueueMeta(
-    {
-      phase: 'ready',
-      board: createEmptyBoard(),
-      active: spawnPiece(firstPieces[0]),
-      hold: null,
-      canHold: true,
-      nextQueue: firstPieces.slice(1),
-      stats: {
-        score: 0,
-        level: 1,
-        lines: 0
-      }
-    },
-    seed,
-    1
-  );
+  return {
+    phase: 'ready',
+    board: createEmptyBoard(),
+    active: spawnPiece(firstPieces[0]),
+    hold: null,
+    canHold: true,
+    nextQueue: firstPieces.slice(1),
+    stats: {
+      score: 0,
+      level: 1,
+      lines: 0
+    }
+  };
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   if (action.type === 'restart') {
-    return createInitialState(getSeed(state));
+    return {
+      ...createInitialState(Date.now()),
+      phase: 'playing'
+    };
   }
 
   if (action.type === 'start' && state.phase === 'ready') {
@@ -234,18 +218,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (state.hold === null) {
         const next = pullNext(state);
         const active = spawnPiece(next.piece);
-        return withQueueMeta(
-          {
-            ...state,
-            active,
-            hold: state.active.type,
-            canHold: false,
-            nextQueue: next.nextQueue,
-            phase: isValidPosition(state.board, active) ? 'playing' : 'gameOver'
-          },
-          getSeed(state),
-          next.nextIndex
-        );
+        return {
+          ...state,
+          active,
+          hold: state.active.type,
+          canHold: false,
+          nextQueue: next.nextQueue,
+          phase: isValidPosition(state.board, active) ? 'playing' : 'gameOver'
+        };
       }
 
       const active = spawnPiece(state.hold);

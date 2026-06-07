@@ -161,4 +161,45 @@ describe('game reducer rules', () => {
     expect(paused.board).toBe(playing.board);
     expect(resumed.board).toBe(playing.board);
   });
+
+  it('uses only the public game state shape', () => {
+    expect(Object.keys(createInitialState(1)).sort()).toEqual([
+      'active',
+      'board',
+      'canHold',
+      'hold',
+      'nextQueue',
+      'phase',
+      'stats'
+    ]);
+  });
+
+  it('restarts as a fresh playing game with reset stats', () => {
+    const played = {
+      ...gameReducer(createInitialState(1), { type: 'start' }),
+      stats: { score: 1200, lines: 14, level: 2 }
+    };
+    const restarted = gameReducer(played, { type: 'restart' });
+
+    expect(restarted.phase).toBe('playing');
+    expect(restarted.stats).toEqual({ score: 0, lines: 0, level: 1 });
+  });
+
+  it('rotates near a wall by applying a horizontal kick', () => {
+    const playing = {
+      ...gameReducer(createInitialState(1), { type: 'start' }),
+      active: { type: 'I' as const, position: { x: -1, y: 2 }, rotation: 1 }
+    };
+    const rotated = gameReducer(playing, { type: 'rotate', direction: 1 });
+
+    expect(rotated.active.position.x).toBe(1);
+    expect(rotated.active.rotation).toBe(2);
+  });
+
+  it('normalizes stored rotation values', () => {
+    const playing = gameReducer(createInitialState(1), { type: 'start' });
+    const rotated = gameReducer(playing, { type: 'rotate', direction: -1 });
+
+    expect(rotated.active.rotation).toBe(3);
+  });
 });
