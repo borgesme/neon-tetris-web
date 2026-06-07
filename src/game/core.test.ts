@@ -9,6 +9,7 @@ import {
   isValidPosition,
   mergePiece
 } from './board';
+import { createInitialState, gameReducer } from './rules';
 import { getGhostPiece } from './selectors';
 
 describe('game constants', () => {
@@ -113,5 +114,51 @@ describe('piece cells', () => {
       { x: 4, y: 4, type: 'L' },
       { x: 4, y: 5, type: 'L' }
     ]);
+  });
+});
+
+describe('game reducer rules', () => {
+  it('starts ready and moves to playing', () => {
+    const state = createInitialState(1);
+
+    expect(state.phase).toBe('ready');
+    expect(gameReducer(state, { type: 'start' }).phase).toBe('playing');
+  });
+
+  it('moves the active piece left when valid', () => {
+    const playing = gameReducer(createInitialState(1), { type: 'start' });
+    const moved = gameReducer(playing, { type: 'move', dx: -1 });
+
+    expect(moved.active.position.x).toBe(playing.active.position.x - 1);
+  });
+
+  it('hard drops with score and refreshes hold permission', () => {
+    const playing = gameReducer(createInitialState(1), { type: 'start' });
+    const held = gameReducer(playing, { type: 'hold' });
+    const dropped = gameReducer(held, { type: 'hardDrop' });
+
+    expect(dropped.stats.score).toBeGreaterThan(held.stats.score);
+    expect(dropped.canHold).toBe(true);
+  });
+
+  it('allows hold once before locking', () => {
+    const playing = gameReducer(createInitialState(1), { type: 'start' });
+    const held = gameReducer(playing, { type: 'hold' });
+    const heldAgain = gameReducer(held, { type: 'hold' });
+
+    expect(held.hold).toBe(playing.active.type);
+    expect(held.canHold).toBe(false);
+    expect(heldAgain).toBe(held);
+  });
+
+  it('pauses and resumes without changing the board', () => {
+    const playing = gameReducer(createInitialState(1), { type: 'start' });
+    const paused = gameReducer(playing, { type: 'pause' });
+    const resumed = gameReducer(paused, { type: 'resume' });
+
+    expect(paused.phase).toBe('paused');
+    expect(resumed.phase).toBe('playing');
+    expect(paused.board).toBe(playing.board);
+    expect(resumed.board).toBe(playing.board);
   });
 });
