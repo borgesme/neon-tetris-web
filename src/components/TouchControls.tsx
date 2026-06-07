@@ -1,4 +1,3 @@
-import type { PointerEvent } from 'react';
 import type { GameAction } from '../game/types';
 
 interface TouchControlsProps {
@@ -21,11 +20,6 @@ const TOUCH_BUTTONS: TouchButton[] = [
 ];
 
 export function TouchControls({ dispatch }: TouchControlsProps) {
-  function handlePointerDown(event: PointerEvent<HTMLButtonElement>, action: GameAction) {
-    event.preventDefault();
-    dispatch(action);
-  }
-
   return (
     <nav className="touch-controls" aria-label="Touch controls">
       {TOUCH_BUTTONS.map((button) => (
@@ -33,7 +27,7 @@ export function TouchControls({ dispatch }: TouchControlsProps) {
           className={button.className}
           key={button.label}
           type="button"
-          onPointerDown={(event) => handlePointerDown(event, button.action)}
+          onClick={() => dispatch(button.action)}
         >
           {button.label}
         </button>

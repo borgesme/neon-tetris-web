@@ -43,6 +43,7 @@ button {
   font: inherit;
   font-weight: 700;
   letter-spacing: 0;
+  touch-action: manipulation;
 }
 
 button:hover {
@@ -311,81 +312,159 @@ button.primary {
 
 @media (max-width: 720px) {
   .app-shell {
-    padding: 16px;
+    padding: 12px 12px calc(118px + env(safe-area-inset-bottom));
   }
 
   .app-header {
     align-items: start;
+    margin-bottom: 10px;
   }
 
   .app-header h1 {
-    font-size: 2.4rem;
+    font-size: 2rem;
+  }
+
+  .eyebrow {
+    display: none;
   }
 
   .phase-pill {
-    min-width: 96px;
+    min-width: 92px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
   }
 
   .game-main {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 10px;
   }
 
   .game-canvas {
-    width: min(92vw, 44vh, 380px);
+    width: min(84vw, 30vh, 320px);
   }
 
   .game-panel {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .panel-card {
+    padding: 10px;
+  }
+
+  .panel-card h2 {
+    margin-bottom: 6px;
+    font-size: 0.68rem;
+  }
+
+  .hold-card {
+    grid-column: span 1;
+    min-height: 0;
+  }
+
+  .next-card {
+    grid-column: span 3;
+  }
+
+  .stats-card,
+  .actions-card {
+    grid-column: span 2;
   }
 
   .next-list {
-    grid-template-columns: repeat(5, minmax(42px, 1fr));
+    grid-template-columns: repeat(5, minmax(28px, 1fr));
+    gap: 5px;
   }
 
   .piece-preview {
-    grid-template-columns: repeat(4, 9px);
-    grid-template-rows: repeat(3, 9px);
-    min-height: 46px;
+    grid-template-columns: repeat(4, 7px);
+    grid-template-rows: repeat(3, 7px);
+    min-height: 34px;
   }
 
   .piece-cell {
-    width: 9px;
-    height: 9px;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+  }
+
+  .empty-preview {
+    min-height: 34px;
+    font-size: 0.74rem;
   }
 
   .stats-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .stat-tile {
+    padding: 8px;
+  }
+
+  .stat-tile span {
+    margin-bottom: 3px;
+    font-size: 0.64rem;
+  }
+
+  .stat-tile strong {
+    font-size: 1rem;
+  }
+
+  .panel-actions {
+    gap: 6px;
+  }
+
+  .panel-actions button {
+    min-height: 38px;
+    font-size: 0.86rem;
   }
 
   .touch-controls {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 8;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(430px, 100%);
+    margin: 0 auto;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: rgba(7, 10, 18, 0.96);
+    box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.34);
+  }
+
+  .touch-controls button {
+    min-height: 44px;
+    font-size: 0.88rem;
   }
 }
 
 @media (max-width: 430px) {
   .app-header {
-    flex-direction: column;
-    gap: 10px;
+    align-items: center;
   }
 
   .phase-pill {
-    width: 100%;
+    width: auto;
   }
 
   .game-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .next-card,
+  .hold-card {
+    grid-column: span 1;
+  }
+
+  .next-card {
+    grid-column: span 3;
+  }
+
   .stats-card,
   .actions-card {
-    grid-column: auto;
-  }
-
-  .stats-grid,
-  .touch-controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-column: span 2;
   }
 }
