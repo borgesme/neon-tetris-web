@@ -25,6 +25,7 @@ export default function App() {
   const [settings, setSettings] = useState(readSettings);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [leaderboardVersion, setLeaderboardVersion] = useState(0);
   const submittedScoreRef = useRef<string | null>(null);
   const dispatch = useCallback((action: GameAction) => rawDispatch(action), []);
 
@@ -57,6 +58,7 @@ export default function App() {
       lines: state.stats.lines,
       createdAt: new Date().toISOString()
     });
+    setLeaderboardVersion((version) => version + 1);
   }, [state.bagSeed, state.phase, state.stats.level, state.stats.lines, state.stats.score]);
 
   const currentScore = {
@@ -99,7 +101,11 @@ export default function App() {
 
       <TouchControls dispatch={dispatch} />
 
-      <LeaderboardDialog open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
+      <LeaderboardDialog
+        open={leaderboardOpen}
+        refreshKey={leaderboardVersion}
+        onClose={() => setLeaderboardOpen(false)}
+      />
       <SettingsDialog
         open={settingsOpen}
         settings={settings}

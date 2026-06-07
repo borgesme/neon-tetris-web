@@ -10,6 +10,11 @@ interface DialogProps {
 
 export function Dialog({ title, open, onClose, children }: DialogProps) {
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) {
@@ -21,7 +26,7 @@ export function Dialog({ title, open, onClose, children }: DialogProps) {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
       }
     }
 
@@ -32,7 +37,7 @@ export function Dialog({ title, open, onClose, children }: DialogProps) {
       document.removeEventListener('keydown', onKeyDown);
       previousFocus?.focus();
     };
-  }, [onClose, open]);
+  }, [open]);
 
   if (!open) {
     return null;

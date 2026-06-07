@@ -22,7 +22,7 @@ describe('Task 8 dialogs and PWA controls', () => {
   test('leaderboard dialog renders an empty state', () => {
     readScoresMock.mockReturnValue([]);
 
-    render(<LeaderboardDialog open onClose={() => undefined} />);
+    render(<LeaderboardDialog open refreshKey={0} onClose={() => undefined} />);
 
     expect(screen.getByRole('dialog', { name: 'Local Leaderboard' })).toBeTruthy();
     expect(screen.getByText('No scores yet.')).toBeTruthy();
@@ -33,7 +33,7 @@ describe('Task 8 dialogs and PWA controls', () => {
       { score: 12000, level: 8, lines: 64, createdAt: '2026-06-08T00:00:00.000Z' }
     ]);
 
-    render(<LeaderboardDialog open onClose={() => undefined} />);
+    render(<LeaderboardDialog open refreshKey={0} onClose={() => undefined} />);
 
     expect(screen.getByText('12000')).toBeTruthy();
     expect(screen.getByText('Level 8')).toBeTruthy();
@@ -106,5 +106,51 @@ describe('Task 8 dialogs and PWA controls', () => {
 
     expect(screen.queryByRole('dialog', { name: 'Settings' })).toBeNull();
     expect(trigger).toBe(document.activeElement);
+  });
+
+  test('dialog keeps focus when only onClose identity changes', () => {
+    function DialogHarness() {
+      const [version, setVersion] = useState(0);
+      const onClose = version === 0 ? () => undefined : () => undefined;
+      return (
+        <>
+          <button type="button" onClick={() => setVersion((value) => value + 1)}>
+            Rerender
+          </button>
+          <Dialog title="Settings" open onClose={onClose}>
+            <button type="button">Inside dialog</button>
+          </Dialog>
+        </>
+      );
+    }
+
+    render(<DialogHarness />);
+
+    const inside = screen.getByRole('button', { name: 'Inside dialog' });
+    inside.focus();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rerender' }));
+
+    expect(inside).toBe(document.activeElement);
+  });
+
+  test('leaderboard dialog updates when refreshKey changes', () => {
+    let scores = [
+      { score: 900, level: 3, lines: 18, createdAt: '2026-06-08T00:07:00.000Z' }
+    ];
+    readScoresMock.mockImplementation(() => scores);
+
+    const { rerender } = render(
+      <LeaderboardDialog open refreshKey={0} onClose={() => undefined} />
+    );
+
+    expect(screen.getByText('900')).toBeTruthy();
+
+    scores = [
+      { score: 1800, level: 5, lines: 32, createdAt: '2026-06-08T00:08:00.000Z' }
+    ];
+    rerender(<LeaderboardDialog open refreshKey={1} onClose={() => undefined} />);
+
+    expect(screen.getByText('1800')).toBeTruthy();
   });
 });

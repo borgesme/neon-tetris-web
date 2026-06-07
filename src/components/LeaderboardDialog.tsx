@@ -3,11 +3,13 @@ import { Dialog } from './Dialog';
 
 interface LeaderboardDialogProps {
   open: boolean;
+  refreshKey: number;
   onClose: () => void;
 }
 
-export function LeaderboardDialog({ open, onClose }: LeaderboardDialogProps) {
+export function LeaderboardDialog({ open, refreshKey, onClose }: LeaderboardDialogProps) {
   const scores = readScores();
+  void refreshKey;
 
   return (
     <Dialog title="Local Leaderboard" open={open} onClose={onClose}>
