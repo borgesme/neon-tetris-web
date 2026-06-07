@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { Dispatch } from 'react';
-import type { GameAction } from '../game/types';
+import type { GameAction, GamePhase } from '../game/types';
 
 const ACTIONS: Record<string, GameAction> = {
   ArrowLeft: { type: 'move', dx: -1 },
@@ -13,25 +13,56 @@ const ACTIONS: Record<string, GameAction> = {
   Z: { type: 'rotate', direction: -1 },
   c: { type: 'hold' },
   C: { type: 'hold' },
-  p: { type: 'pause' },
-  P: { type: 'pause' },
   r: { type: 'restart' },
   R: { type: 'restart' },
+  ' ': { type: 'hardDrop' },
   Space: { type: 'hardDrop' }
 };
 
-function isIgnoredTarget(target: EventTarget | null): boolean {
-  return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+interface UseKeyboardControlsOptions {
+  phase: GamePhase;
+  dispatch: Dispatch<GameAction>;
 }
 
-export function useKeyboardControls(dispatch: Dispatch<GameAction>) {
+function hasReservedModifier(event: KeyboardEvent): boolean {
+  return event.ctrlKey || event.metaKey || event.altKey;
+}
+
+function isIgnoredTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  return (
+    (target instanceof HTMLElement && target.isContentEditable) ||
+    target.closest(
+      'input, textarea, select, button, a[href], [contenteditable], [role="button"], [role="textbox"]'
+    ) !== null
+  );
+}
+
+function getKeyboardAction(event: KeyboardEvent, phase: GamePhase): GameAction | undefined {
+  if (event.key === 'p' || event.key === 'P') {
+    if (phase === 'playing') {
+      return { type: 'pause' };
+    }
+    if (phase === 'paused') {
+      return { type: 'resume' };
+    }
+    return undefined;
+  }
+
+  return ACTIONS[event.code] ?? ACTIONS[event.key];
+}
+
+export function useKeyboardControls({ phase, dispatch }: UseKeyboardControlsOptions) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (isIgnoredTarget(event.target)) {
+      if (hasReservedModifier(event) || isIgnoredTarget(event.target)) {
         return;
       }
 
-      const action = ACTIONS[event.code] ?? ACTIONS[event.key];
+      const action = getKeyboardAction(event, phase);
       if (!action) {
         return;
       }
@@ -42,5 +73,5 @@ export function useKeyboardControls(dispatch: Dispatch<GameAction>) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [dispatch]);
+  }, [dispatch, phase]);
 }
