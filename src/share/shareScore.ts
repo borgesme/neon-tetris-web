@@ -6,19 +6,20 @@ export function formatScoreShare(entry: ScoreEntry): string {
 
 export async function shareScore(entry: ScoreEntry): Promise<'shared' | 'copied' | 'unsupported'> {
   const text = formatScoreShare(entry);
+  const shareNavigator = typeof navigator === 'undefined' ? undefined : navigator;
 
-  if (navigator.share) {
+  if (shareNavigator?.share) {
     try {
-      await navigator.share({ text });
+      await shareNavigator.share({ text });
       return 'shared';
     } catch {
       // Fall through to clipboard if native sharing is unavailable at runtime.
     }
   }
 
-  if (navigator.clipboard?.writeText) {
+  if (shareNavigator?.clipboard?.writeText) {
     try {
-      await navigator.clipboard.writeText(text);
+      await shareNavigator.clipboard.writeText(text);
       return 'copied';
     } catch {
       return 'unsupported';

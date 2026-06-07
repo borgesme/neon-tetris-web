@@ -30,6 +30,10 @@ function normalizeScores(scores: ScoreEntry[]): ScoreEntry[] {
 }
 
 export function readScores(): ScoreEntry[] {
+  if (useMemoryFallback) {
+    return [...memoryScores];
+  }
+
   let storedScores: string | null;
 
   try {
@@ -39,7 +43,7 @@ export function readScores(): ScoreEntry[] {
   }
 
   if (storedScores === null) {
-    return useMemoryFallback ? [...memoryScores] : [];
+    return [];
   }
 
   try {

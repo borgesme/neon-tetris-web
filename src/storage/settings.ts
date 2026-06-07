@@ -23,6 +23,10 @@ function isAppSettings(value: unknown): value is AppSettings {
 }
 
 export function readSettings(): AppSettings {
+  if (useMemoryFallback) {
+    return memorySettings;
+  }
+
   let storedSettings: string | null;
 
   try {
@@ -32,7 +36,7 @@ export function readSettings(): AppSettings {
   }
 
   if (storedSettings === null) {
-    return useMemoryFallback ? memorySettings : DEFAULT_SETTINGS;
+    return DEFAULT_SETTINGS;
   }
 
   try {
