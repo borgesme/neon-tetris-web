@@ -124,6 +124,7 @@ button.primary {
   grid-template-columns: minmax(300px, 460px) minmax(300px, 1fr);
   align-items: start;
   gap: 22px;
+  min-width: 0;
 }
 
 .board-frame {
@@ -150,6 +151,7 @@ button.primary {
 }
 
 .panel-card {
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(14, 22, 36, 0.9);
@@ -286,6 +288,10 @@ button.primary {
   margin-top: 18px;
 }
 
+.touch-controls button {
+  min-width: 0;
+}
+
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -368,12 +374,15 @@ button.primary {
 
   .app-header {
     align-items: start;
+    flex-wrap: wrap;
     margin-bottom: 10px;
   }
 
   .header-actions {
+    width: 100%;
     max-width: 244px;
     gap: 6px;
+    justify-content: flex-start;
   }
 
   .header-actions button {
@@ -408,6 +417,7 @@ button.primary {
   .game-panel {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
+    width: 100%;
   }
 
   .panel-card {
@@ -490,7 +500,8 @@ button.primary {
     z-index: 8;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    width: min(430px, 100%);
+    width: 100%;
+    max-width: 430px;
     margin: 0 auto;
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
@@ -501,6 +512,7 @@ button.primary {
   .touch-controls button {
     min-height: 44px;
     font-size: 0.88rem;
+    padding: 0 6px;
   }
 }
 
@@ -517,7 +529,8 @@ button.primary {
     z-index: 8;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    width: min(430px, 100%);
+    width: 100%;
+    max-width: 430px;
     margin: 0 auto;
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
@@ -533,7 +546,11 @@ button.primary {
 
 @media (max-width: 430px) {
   .app-header {
-    align-items: center;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    max-width: none;
   }
 
   .phase-pill {
@@ -555,5 +572,16 @@ button.primary {
   .stats-card,
   .actions-card {
     grid-column: span 2;
+  }
+
+  .touch-controls {
+    gap: 8px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .touch-controls button {
+    font-size: 0.82rem;
+    padding: 0 4px;
   }
 }
