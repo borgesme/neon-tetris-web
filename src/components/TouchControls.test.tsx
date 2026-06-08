@@ -1,10 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import {
-  TOUCH_REPEAT_DELAY_MS,
-  TOUCH_REPEAT_INTERVAL_MS,
-  TouchControls
-} from './TouchControls';
+import { TOUCH_REPEAT_DELAY_MS, TOUCH_REPEAT_INTERVAL_MS, TouchControls } from './TouchControls';
 
 describe('TouchControls', () => {
   afterEach(() => {

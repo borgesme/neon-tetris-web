@@ -109,10 +109,7 @@ export function GamePanel({ state, dispatch }: GamePanelProps) {
           >
             {phaseAction.label}
           </button>
-          <button
-            type="button"
-            onClick={(event) => dispatchAndBlur(event, { type: 'restart' })}
-          >
+          <button type="button" onClick={(event) => dispatchAndBlur(event, { type: 'restart' })}>
             Restart
           </button>
         </div>

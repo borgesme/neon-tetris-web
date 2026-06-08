@@ -15,8 +15,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
 let memorySettings: AppSettings = DEFAULT_SETTINGS;
 let useMemoryFallback = false;
 
-function isBaseSettings(value: unknown): value is Pick<AppSettings, 'theme' | 'soundEnabled'> &
-  Partial<Pick<AppSettings, 'volume'>> {
+function isBaseSettings(
+  value: unknown
+): value is Pick<AppSettings, 'theme' | 'soundEnabled'> & Partial<Pick<AppSettings, 'volume'>> {
   if (typeof value !== 'object' || value === null) {
     return false;
   }

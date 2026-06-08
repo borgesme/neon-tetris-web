@@ -82,16 +82,16 @@ https://borgesme.github.io/neon-tetris-web/
 
 ### 键盘
 
-| 按键 | 行为 |
-| --- | --- |
-| Left / Right | 左右移动 |
-| Down | 软降 |
-| Space | 硬降 |
-| Up / X | 顺时针旋转 |
-| Z | 逆时针旋转 |
-| C | Hold |
-| P | 暂停 / 继续 |
-| R | 重新开始 |
+| 按键         | 行为        |
+| ------------ | ----------- |
+| Left / Right | 左右移动    |
+| Down         | 软降        |
+| Space        | 硬降        |
+| Up / X       | 顺时针旋转  |
+| Z            | 逆时针旋转  |
+| C            | Hold        |
+| P            | 暂停 / 继续 |
+| R            | 重新开始    |
 
 ### 触控
 

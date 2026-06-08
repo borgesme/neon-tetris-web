@@ -86,12 +86,9 @@ export default function App() {
       return;
     }
 
-    const scoreKey = [
-      state.bagSeed,
-      state.stats.score,
-      state.stats.level,
-      state.stats.lines
-    ].join(':');
+    const scoreKey = [state.bagSeed, state.stats.score, state.stats.level, state.stats.lines].join(
+      ':'
+    );
     if (submittedScoreRef.current === scoreKey) {
       return;
     }

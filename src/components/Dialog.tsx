@@ -22,7 +22,8 @@ export function Dialog({ title, open, onClose, children }: DialogProps) {
       return undefined;
     }
 
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     function getFocusableElements() {
       return Array.from(
@@ -30,7 +31,8 @@ export function Dialog({ title, open, onClose, children }: DialogProps) {
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         ) ?? []
       ).filter(
-        (element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
+        (element) =>
+          !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true'
       );
     }
 

@@ -150,8 +150,7 @@ export function GameCanvas({ state }: GameCanvasProps) {
     }
 
     const draw = () => renderCanvas(canvas, stateRef.current);
-    const resizeObserver =
-      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(draw);
+    const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(draw);
 
     draw();
     resizeObserver?.observe(canvas);

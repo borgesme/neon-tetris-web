@@ -163,9 +163,7 @@ describe('Task 8 dialogs and PWA controls', () => {
   });
 
   test('leaderboard dialog updates when refreshKey changes', () => {
-    let scores = [
-      { score: 900, level: 3, lines: 18, createdAt: '2026-06-08T00:07:00.000Z' }
-    ];
+    let scores = [{ score: 900, level: 3, lines: 18, createdAt: '2026-06-08T00:07:00.000Z' }];
     readScoresMock.mockImplementation(() => scores);
 
     const { rerender } = render(
@@ -174,9 +172,7 @@ describe('Task 8 dialogs and PWA controls', () => {
 
     expect(screen.getByText('900')).toBeTruthy();
 
-    scores = [
-      { score: 1800, level: 5, lines: 32, createdAt: '2026-06-08T00:08:00.000Z' }
-    ];
+    scores = [{ score: 1800, level: 5, lines: 32, createdAt: '2026-06-08T00:08:00.000Z' }];
     rerender(<LeaderboardDialog open refreshKey={1} onClose={() => undefined} />);
 
     expect(screen.getByText('1800')).toBeTruthy();

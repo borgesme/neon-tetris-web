@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BOARD_HEIGHT, BOARD_WIDTH, PIECE_TYPES, TETROMINOES, VISIBLE_QUEUE_SIZE } from './constants';
+import {
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+  PIECE_TYPES,
+  TETROMINOES,
+  VISIBLE_QUEUE_SIZE
+} from './constants';
 import { createSeededRng, createSevenBag } from './random';
 import type { ActivePiece, Board } from './types';
 import {
@@ -256,9 +262,15 @@ describe('game reducer rules', () => {
       type: 'hardDrop' as const
     }));
 
-    const first = lockActions.reduce(gameReducer, gameReducer(createInitialState(11), { type: 'start' }));
+    const first = lockActions.reduce(
+      gameReducer,
+      gameReducer(createInitialState(11), { type: 'start' })
+    );
     now.mockClear();
-    const second = lockActions.reduce(gameReducer, gameReducer(createInitialState(11), { type: 'start' }));
+    const second = lockActions.reduce(
+      gameReducer,
+      gameReducer(createInitialState(11), { type: 'start' })
+    );
     const dateCalls = now.mock.calls.length;
     now.mockRestore();
 

@@ -32,18 +32,69 @@ interface WindowWithAudioContext extends Window {
 }
 
 const PATTERNS: Record<SoundEvent, SoundPattern> = {
-  start: { type: 'triangle', peak: 0.26, notes: [{ frequency: 392, duration: 0.06 }, { frequency: 784, duration: 0.1, delay: 0.06 }] },
+  start: {
+    type: 'triangle',
+    peak: 0.26,
+    notes: [
+      { frequency: 392, duration: 0.06 },
+      { frequency: 784, duration: 0.1, delay: 0.06 }
+    ]
+  },
   pause: { type: 'sine', peak: 0.18, notes: [{ frequency: 320, duration: 0.11 }] },
-  resume: { type: 'triangle', peak: 0.22, notes: [{ frequency: 440, duration: 0.05 }, { frequency: 660, duration: 0.08, delay: 0.05 }] },
+  resume: {
+    type: 'triangle',
+    peak: 0.22,
+    notes: [
+      { frequency: 440, duration: 0.05 },
+      { frequency: 660, duration: 0.08, delay: 0.05 }
+    ]
+  },
   move: { type: 'square', peak: 0.08, notes: [{ frequency: 220, duration: 0.035 }] },
   rotate: { type: 'triangle', peak: 0.13, notes: [{ frequency: 520, duration: 0.045 }] },
   softDrop: { type: 'sine', peak: 0.08, notes: [{ frequency: 180, duration: 0.035 }] },
-  hardDrop: { type: 'sawtooth', peak: 0.2, notes: [{ frequency: 110, duration: 0.08 }, { frequency: 82, duration: 0.07, delay: 0.04 }] },
-  hold: { type: 'triangle', peak: 0.18, notes: [{ frequency: 330, duration: 0.05 }, { frequency: 494, duration: 0.06, delay: 0.04 }] },
+  hardDrop: {
+    type: 'sawtooth',
+    peak: 0.2,
+    notes: [
+      { frequency: 110, duration: 0.08 },
+      { frequency: 82, duration: 0.07, delay: 0.04 }
+    ]
+  },
+  hold: {
+    type: 'triangle',
+    peak: 0.18,
+    notes: [
+      { frequency: 330, duration: 0.05 },
+      { frequency: 494, duration: 0.06, delay: 0.04 }
+    ]
+  },
   lock: { type: 'square', peak: 0.13, notes: [{ frequency: 150, duration: 0.055 }] },
-  lineClear: { type: 'triangle', peak: 0.26, notes: [{ frequency: 660, duration: 0.06 }, { frequency: 880, duration: 0.08, delay: 0.05 }] },
-  levelUp: { type: 'triangle', peak: 0.3, notes: [{ frequency: 523, duration: 0.06 }, { frequency: 784, duration: 0.07, delay: 0.05 }, { frequency: 1047, duration: 0.11, delay: 0.11 }] },
-  gameOver: { type: 'sawtooth', peak: 0.24, notes: [{ frequency: 220, duration: 0.12 }, { frequency: 165, duration: 0.14, delay: 0.1 }, { frequency: 110, duration: 0.18, delay: 0.22 }] },
+  lineClear: {
+    type: 'triangle',
+    peak: 0.26,
+    notes: [
+      { frequency: 660, duration: 0.06 },
+      { frequency: 880, duration: 0.08, delay: 0.05 }
+    ]
+  },
+  levelUp: {
+    type: 'triangle',
+    peak: 0.3,
+    notes: [
+      { frequency: 523, duration: 0.06 },
+      { frequency: 784, duration: 0.07, delay: 0.05 },
+      { frequency: 1047, duration: 0.11, delay: 0.11 }
+    ]
+  },
+  gameOver: {
+    type: 'sawtooth',
+    peak: 0.24,
+    notes: [
+      { frequency: 220, duration: 0.12 },
+      { frequency: 165, duration: 0.14, delay: 0.1 },
+      { frequency: 110, duration: 0.18, delay: 0.22 }
+    ]
+  },
   button: { type: 'sine', peak: 0.1, notes: [{ frequency: 480, duration: 0.04 }] }
 };
 

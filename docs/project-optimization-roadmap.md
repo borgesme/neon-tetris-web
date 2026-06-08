@@ -12,18 +12,18 @@
 
 ## 优先级总览
 
-| 优先级 | 优化项 | 现象 / 信号 | 目标 | 验证方式 |
-|---|---|---|---|---|
-| P0 | 优化 7-bag 随机器流 | `src/game/rules.ts` 每次按 index 取后续方块时会从 seed 重新生成 stream | 长局游戏中避免重复计算，保留确定性 | 增加队列推进测试；跑 `pnpm.cmd test` |
-| P0 | Canvas backing store 只在尺寸变化时更新 | `GameCanvas` 每次状态渲染都会设置 `canvas.width/height` | 降低重绘成本和移动端电量消耗 | 手动试玩 + `pnpm.cmd build` |
-| P0 | 移动端长按连续操作 | 触控按钮当前只有点击动作 | 提升移动端左右移动和软降手感 | 新增触控行为测试；移动端试玩 |
-| P1 | 发布 workflow 增加测试门禁 | GitHub Pages workflow 当前只安装和构建 | 避免测试失败仍发布 | GitHub Actions 中 test/build 均通过 |
-| P1 | 增加 lint / format / typecheck 脚本 | `package.json` 只有 build/test | 提升提交前质量检查稳定性 | 新脚本本地通过，并加入 CI |
-| P1 | 拆分或分区 `styles.css` | 样式文件已超过 500 行 | 降低样式维护成本 | 构建通过，关键视口视觉回归 |
-| P1 | 分享结果增加 UI 反馈 | `shareScore` 返回状态但 `App` 丢弃结果 | 用户知道已分享、已复制或失败 | 组件交互测试 + 手动验证 |
-| P1 | 同步或删除静态 manifest | `public/manifest.webmanifest` 仍保留绝对路径 | 避免与 VitePWA 生成 manifest 混淆 | 构建后 manifest 仍为相对路径 |
-| P2 | 删除或收敛未使用 hook | `usePersistentState` 当前未被业务引用 | 减少遗留代码 | `rg usePersistentState` 无业务引用，测试通过 |
-| P2 | 更接近 SRS 的旋转踢墙 | 当前 wall kick 只有水平偏移 | 提升俄罗斯方块规则手感 | 补 SRS 场景测试 |
+| 优先级 | 优化项                                  | 现象 / 信号                                                            | 目标                               | 验证方式                                     |
+| ------ | --------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------- | -------------------------------------------- |
+| P0     | 优化 7-bag 随机器流                     | `src/game/rules.ts` 每次按 index 取后续方块时会从 seed 重新生成 stream | 长局游戏中避免重复计算，保留确定性 | 增加队列推进测试；跑 `pnpm.cmd test`         |
+| P0     | Canvas backing store 只在尺寸变化时更新 | `GameCanvas` 每次状态渲染都会设置 `canvas.width/height`                | 降低重绘成本和移动端电量消耗       | 手动试玩 + `pnpm.cmd build`                  |
+| P0     | 移动端长按连续操作                      | 触控按钮当前只有点击动作                                               | 提升移动端左右移动和软降手感       | 新增触控行为测试；移动端试玩                 |
+| P1     | 发布 workflow 增加测试门禁              | GitHub Pages workflow 当前只安装和构建                                 | 避免测试失败仍发布                 | GitHub Actions 中 test/build 均通过          |
+| P1     | 增加 lint / format / typecheck 脚本     | `package.json` 只有 build/test                                         | 提升提交前质量检查稳定性           | 新脚本本地通过，并加入 CI                    |
+| P1     | 拆分或分区 `styles.css`                 | 样式文件已超过 500 行                                                  | 降低样式维护成本                   | 构建通过，关键视口视觉回归                   |
+| P1     | 分享结果增加 UI 反馈                    | `shareScore` 返回状态但 `App` 丢弃结果                                 | 用户知道已分享、已复制或失败       | 组件交互测试 + 手动验证                      |
+| P1     | 同步或删除静态 manifest                 | `public/manifest.webmanifest` 仍保留绝对路径                           | 避免与 VitePWA 生成 manifest 混淆  | 构建后 manifest 仍为相对路径                 |
+| P2     | 删除或收敛未使用 hook                   | `usePersistentState` 当前未被业务引用                                  | 减少遗留代码                       | `rg usePersistentState` 无业务引用，测试通过 |
+| P2     | 更接近 SRS 的旋转踢墙                   | 当前 wall kick 只有水平偏移                                            | 提升俄罗斯方块规则手感             | 补 SRS 场景测试                              |
 
 ## P0 优化项
 

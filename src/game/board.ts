@@ -43,9 +43,7 @@ export function mergePiece(board: Board, piece: ActivePiece): Board {
 }
 
 export function clearFullLines(board: Board): { board: Board; linesCleared: number } {
-  const remaining = board
-    .filter((row) => row.some((cell) => cell === null))
-    .map((row) => [...row]);
+  const remaining = board.filter((row) => row.some((cell) => cell === null)).map((row) => [...row]);
   const linesCleared = BOARD_HEIGHT - remaining.length;
   const emptyRows = Array.from({ length: linesCleared }, () => Array<Cell>(BOARD_WIDTH).fill(null));
   return {

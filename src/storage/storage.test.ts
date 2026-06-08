@@ -9,7 +9,10 @@ async function loadStorageModules(): Promise<{
   settings: SettingsModule;
 }> {
   vi.resetModules();
-  const [leaderboard, settings] = await Promise.all([import('./leaderboard'), import('./settings')]);
+  const [leaderboard, settings] = await Promise.all([
+    import('./leaderboard'),
+    import('./settings')
+  ]);
   return { leaderboard, settings };
 }
 

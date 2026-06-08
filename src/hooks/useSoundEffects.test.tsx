@@ -47,9 +47,9 @@ describe('useSoundEffects', () => {
   test('getSoundEvent prioritizes gameOver, levelUp, and lineClear transitions', () => {
     const previous = playingState();
 
-    expect(
-      getSoundEvent(previous, { ...previous, phase: 'gameOver' }, { type: 'tick' })
-    ).toBe('gameOver');
+    expect(getSoundEvent(previous, { ...previous, phase: 'gameOver' }, { type: 'tick' })).toBe(
+      'gameOver'
+    );
     expect(
       getSoundEvent(
         previous,
@@ -88,9 +88,7 @@ describe('useSoundEffects', () => {
   test('hook plays detected sound with configured volume', () => {
     const previous = playingState();
     const current = { ...previous, stats: { score: 100, lines: 1, level: 1 } };
-    const { rerender } = render(
-      <SoundHarness state={previous} action={null} actionId={0} />
-    );
+    const { rerender } = render(<SoundHarness state={previous} action={null} actionId={0} />);
 
     rerender(<SoundHarness state={current} action={{ type: 'tick' }} actionId={1} />);
 
@@ -105,12 +103,7 @@ describe('useSoundEffects', () => {
     );
 
     rerender(
-      <SoundHarness
-        state={current}
-        action={{ type: 'tick' }}
-        actionId={1}
-        soundEnabled={false}
-      />
+      <SoundHarness state={current} action={{ type: 'tick' }} actionId={1} soundEnabled={false} />
     );
 
     expect(playSoundMock).not.toHaveBeenCalled();
