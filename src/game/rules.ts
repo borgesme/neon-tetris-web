@@ -1,7 +1,7 @@
 import { BOARD_WIDTH, SCORE_BY_LINES, VISIBLE_QUEUE_SIZE, getGravityMs } from './constants';
 import { clearFullLines, createEmptyBoard, isValidPosition, mergePiece } from './board';
-import { createSeededRng, createSevenBag } from './random';
-import type { ActivePiece, GameAction, GameState, PieceType } from './types';
+import { createPieceStream, drawPieceFromStream } from './random';
+import type { ActivePiece, GameAction, GameState, PieceStreamState, PieceType } from './types';
 
 const WALL_KICK_OFFSETS = [0, -1, 1, -2, 2] as const;
 
@@ -9,15 +9,26 @@ interface PulledPiece {
   piece: PieceType;
   nextQueue: PieceType[];
   nextIndex: number;
+  stream: PieceStreamState;
 }
 
-function drawPieces(seed: number, count: number): PieceType[] {
-  const bag = createSevenBag(createSeededRng(seed));
-  return Array.from({ length: count }, () => bag.next());
-}
+function drawPieces(
+  stream: PieceStreamState,
+  count: number
+): { pieces: PieceType[]; stream: PieceStreamState } {
+  const pieces: PieceType[] = [];
+  let nextStream = stream;
 
-function getStreamPiece(seed: number, index: number): PieceType {
-  return drawPieces(seed, index + 1)[index];
+  for (let i = 0; i < count; i += 1) {
+    const next = drawPieceFromStream(nextStream);
+    pieces.push(next.piece);
+    nextStream = next.stream;
+  }
+
+  return {
+    pieces,
+    stream: nextStream
+  };
 }
 
 function normalizeRotation(rotation: number): number {
@@ -32,25 +43,27 @@ function spawnPiece(type: PieceType): ActivePiece {
   };
 }
 
-function createQueue(seed: number, startIndex = 0, size = VISIBLE_QUEUE_SIZE): PieceType[] {
-  return drawPieces(seed, startIndex + size).slice(startIndex);
-}
-
 function pullNext(state: GameState): PulledPiece {
   const hasQueuedPiece = state.nextQueue.length > 0;
-  const piece = hasQueuedPiece ? state.nextQueue[0] : getStreamPiece(state.bagSeed, state.nextIndex);
+  let stream = state.stream;
+  const drawn = hasQueuedPiece ? null : drawPieceFromStream(stream);
+  const piece = hasQueuedPiece ? state.nextQueue[0] : drawn!.piece;
+  stream = drawn?.stream ?? stream;
   const nextQueue = hasQueuedPiece ? state.nextQueue.slice(1) : [];
   let nextIndex = state.nextIndex + (hasQueuedPiece ? 0 : 1);
 
   while (nextQueue.length < VISIBLE_QUEUE_SIZE) {
-    nextQueue.push(getStreamPiece(state.bagSeed, nextIndex));
+    const next = drawPieceFromStream(stream);
+    nextQueue.push(next.piece);
+    stream = next.stream;
     nextIndex += 1;
   }
 
   return {
     piece,
     nextQueue,
-    nextIndex
+    nextIndex,
+    stream
   };
 }
 
@@ -82,6 +95,7 @@ function lockPiece(state: GameState, dropScore = 0): GameState {
     active,
     nextQueue: next.nextQueue,
     nextIndex: next.nextIndex,
+    stream: next.stream,
     canHold: true,
     stats
   };
@@ -151,7 +165,9 @@ function hardDrop(state: GameState): GameState {
 }
 
 export function createInitialState(seed = Date.now()): GameState {
-  const firstPieces = createQueue(seed, 0, VISIBLE_QUEUE_SIZE + 1);
+  const initialStream = createPieceStream(seed);
+  const initialDraw = drawPieces(initialStream, VISIBLE_QUEUE_SIZE + 1);
+  const firstPieces = initialDraw.pieces;
 
   return {
     phase: 'ready',
@@ -162,6 +178,7 @@ export function createInitialState(seed = Date.now()): GameState {
     nextQueue: firstPieces.slice(1),
     bagSeed: seed,
     nextIndex: VISIBLE_QUEUE_SIZE + 1,
+    stream: initialDraw.stream,
     stats: {
       score: 0,
       level: 1,
@@ -241,6 +258,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           canHold: false,
           nextQueue: next.nextQueue,
           nextIndex: next.nextIndex,
+          stream: next.stream,
           phase: isValidPosition(state.board, active) ? 'playing' : 'gameOver'
         };
       }

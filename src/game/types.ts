@@ -20,6 +20,11 @@ export interface GameStats {
   lines: number;
 }
 
+export interface PieceStreamState {
+  rngState: number;
+  bag: PieceType[];
+}
+
 export interface GameState {
   phase: GamePhase;
   board: Board;
@@ -31,6 +36,8 @@ export interface GameState {
   bagSeed: number;
   /** Stream index for the next piece to append to nextQueue. */
   nextIndex: number;
+  /** Serializable state for incrementally drawing the seven-bag piece stream. */
+  stream: PieceStreamState;
   stats: GameStats;
 }
 

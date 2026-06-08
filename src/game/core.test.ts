@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BOARD_HEIGHT, BOARD_WIDTH, TETROMINOES, VISIBLE_QUEUE_SIZE } from './constants';
+import { BOARD_HEIGHT, BOARD_WIDTH, PIECE_TYPES, TETROMINOES, VISIBLE_QUEUE_SIZE } from './constants';
 import { createSeededRng, createSevenBag } from './random';
 import type { ActivePiece, Board } from './types';
 import {
@@ -172,7 +172,8 @@ describe('game reducer rules', () => {
       'nextIndex',
       'nextQueue',
       'phase',
-      'stats'
+      'stats',
+      'stream'
     ]);
   });
 
@@ -182,6 +183,14 @@ describe('game reducer rules', () => {
     expect(state.bagSeed).toBe(1);
     expect(state.nextIndex).toBe(VISIBLE_QUEUE_SIZE + 1);
     expect(state.nextQueue).toHaveLength(VISIBLE_QUEUE_SIZE);
+  });
+
+  it('keeps a serializable seven-bag stream state for incremental queue refills', () => {
+    const state = createInitialState(1);
+
+    expect(Object.keys(state.stream).sort()).toEqual(['bag', 'rngState']);
+    expect(typeof state.stream.rngState).toBe('number');
+    expect(state.stream.bag.every((piece) => PIECE_TYPES.includes(piece))).toBe(true);
   });
 
   it('restarts as a fresh playing game with reset stats', () => {
