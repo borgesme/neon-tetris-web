@@ -41,7 +41,7 @@ describe('Task 8 dialogs and PWA controls', () => {
   });
 
   test('settings dialog changes sound setting', () => {
-    const settings: AppSettings = { theme: 'neon', soundEnabled: true };
+    const settings: AppSettings = { theme: 'neon', soundEnabled: true, volume: 0.7 };
     const onChange = vi.fn();
 
     render(
@@ -51,7 +51,35 @@ describe('Task 8 dialogs and PWA controls', () => {
     expect(screen.getByRole('option', { name: 'Neon Dark' })).toBeTruthy();
     fireEvent.click(screen.getByRole('checkbox', { name: 'Sound' }));
 
-    expect(onChange).toHaveBeenCalledWith({ theme: 'neon', soundEnabled: false });
+    expect(onChange).toHaveBeenCalledWith({ theme: 'neon', soundEnabled: false, volume: 0.7 });
+  });
+
+  test('settings dialog changes and disables volume control', () => {
+    const settings: AppSettings = { theme: 'neon', soundEnabled: true, volume: 0.7 };
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <SettingsDialog open settings={settings} onChange={onChange} onClose={() => undefined} />
+    );
+
+    const slider = screen.getByRole('slider', { name: 'Volume' });
+    expect(screen.getByText('70%')).toBeTruthy();
+
+    fireEvent.change(slider, { target: { value: '0.35' } });
+
+    expect(onChange).toHaveBeenCalledWith({ theme: 'neon', soundEnabled: true, volume: 0.35 });
+
+    rerender(
+      <SettingsDialog
+        open
+        settings={{ ...settings, soundEnabled: false }}
+        onChange={onChange}
+        onClose={() => undefined}
+      />
+    );
+
+    expect((screen.getByRole('slider', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(
+      true
+    );
   });
 
   test('PWA install button appears after beforeinstallprompt and clears after choice', async () => {

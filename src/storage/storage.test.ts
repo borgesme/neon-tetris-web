@@ -64,13 +64,25 @@ describe('storage adapters', () => {
   test('settings persist theme/sound and invalid data falls back to defaults', async () => {
     const { settings } = await loadStorageModules();
 
-    settings.writeSettings({ theme: 'neon', soundEnabled: false });
+    settings.writeSettings({ theme: 'neon', soundEnabled: false, volume: 0.45 });
 
-    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: false });
+    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: false, volume: 0.45 });
 
     localStorage.setItem('tetris:settings', '{"theme":"retro","soundEnabled":"yes"}');
 
-    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: true });
+    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: true, volume: 0.7 });
+  });
+
+  test('settings migrate missing volume and reject invalid volume values', async () => {
+    const { settings } = await loadStorageModules();
+
+    localStorage.setItem('tetris:settings', '{"theme":"neon","soundEnabled":false}');
+
+    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: false, volume: 0.7 });
+
+    localStorage.setItem('tetris:settings', '{"theme":"neon","soundEnabled":false,"volume":2}');
+
+    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: true, volume: 0.7 });
   });
 
   test('addScore does not throw when localStorage.setItem fails', async () => {
@@ -121,14 +133,17 @@ describe('storage adapters', () => {
   test('settings return fresh memory value when a write fails over stale stored settings', async () => {
     const { settings } = await loadStorageModules();
 
-    localStorage.setItem('tetris:settings', JSON.stringify({ theme: 'neon', soundEnabled: true }));
+    localStorage.setItem(
+      'tetris:settings',
+      JSON.stringify({ theme: 'neon', soundEnabled: true, volume: 0.7 })
+    );
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('blocked');
     });
 
-    settings.writeSettings({ theme: 'neon', soundEnabled: false });
+    settings.writeSettings({ theme: 'neon', soundEnabled: false, volume: 0.2 });
 
-    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: false });
+    expect(settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: false, volume: 0.2 });
   });
 
   test('shareScore returns unsupported without navigator', async () => {
@@ -157,9 +172,13 @@ describe('storage adapters', () => {
       lines: 6,
       createdAt: '2026-06-08T00:07:00.000Z'
     });
-    firstLoad.settings.writeSettings({ theme: 'neon', soundEnabled: false });
+    firstLoad.settings.writeSettings({ theme: 'neon', soundEnabled: false, volume: 0.3 });
     expect(firstLoad.leaderboard.readScores().map((entry) => entry.score)).toEqual([300]);
-    expect(firstLoad.settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: false });
+    expect(firstLoad.settings.readSettings()).toEqual({
+      theme: 'neon',
+      soundEnabled: false,
+      volume: 0.3
+    });
 
     vi.restoreAllMocks();
     localStorage.clear();
@@ -167,6 +186,10 @@ describe('storage adapters', () => {
     const secondLoad = await loadStorageModules();
 
     expect(secondLoad.leaderboard.readScores()).toEqual([]);
-    expect(secondLoad.settings.readSettings()).toEqual({ theme: 'neon', soundEnabled: true });
+    expect(secondLoad.settings.readSettings()).toEqual({
+      theme: 'neon',
+      soundEnabled: true,
+      volume: 0.7
+    });
   });
 });

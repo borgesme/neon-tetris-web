@@ -367,6 +367,29 @@ button.primary {
   font: inherit;
 }
 
+.volume-control {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+}
+
+.volume-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--cyan);
+}
+
+.volume-control span {
+  color: var(--muted);
+  font-weight: 800;
+  text-align: right;
+}
+
+.volume-control input:disabled + span {
+  opacity: 0.56;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 12px 12px calc(118px + env(safe-area-inset-bottom));
