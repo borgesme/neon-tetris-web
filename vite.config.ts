@@ -1,8 +1,9 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     VitePWA({
@@ -32,6 +33,7 @@ export default defineConfig({
   ],
   test: {
     environment: 'jsdom',
+    exclude: [...configDefaults.exclude, '**/.worktrees/**'],
     globals: true,
     setupFiles: []
   }
