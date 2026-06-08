@@ -1,5 +1,6 @@
 import { TETROMINOES } from '../game/constants';
 import type { GameAction, GamePhase, GameState, PieceType } from '../game/types';
+import type { MouseEvent } from 'react';
 
 interface GamePanelProps {
   state: GameState;
@@ -68,6 +69,10 @@ function StatTile({ label, value }: { label: string; value: number }) {
 
 export function GamePanel({ state, dispatch }: GamePanelProps) {
   const phaseAction = getPhaseAction(state.phase);
+  const dispatchAndBlur = (event: MouseEvent<HTMLButtonElement>, action: GameAction) => {
+    dispatch(action);
+    event.currentTarget.blur();
+  };
 
   return (
     <aside className="game-panel" aria-label="Game information">
@@ -97,10 +102,17 @@ export function GamePanel({ state, dispatch }: GamePanelProps) {
       <section className="panel-card actions-card">
         <h2>Control</h2>
         <div className="panel-actions">
-          <button className="primary" type="button" onClick={() => dispatch(phaseAction.action)}>
+          <button
+            className="primary"
+            type="button"
+            onClick={(event) => dispatchAndBlur(event, phaseAction.action)}
+          >
             {phaseAction.label}
           </button>
-          <button type="button" onClick={() => dispatch({ type: 'restart' })}>
+          <button
+            type="button"
+            onClick={(event) => dispatchAndBlur(event, { type: 'restart' })}
+          >
             Restart
           </button>
         </div>

@@ -504,6 +504,33 @@ button.primary {
   }
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .app-shell {
+    padding-bottom: calc(118px + env(safe-area-inset-bottom));
+  }
+
+  .touch-controls {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 8;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(430px, 100%);
+    margin: 0 auto;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: rgba(7, 10, 18, 0.96);
+    box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.34);
+  }
+
+  .touch-controls button {
+    min-height: 44px;
+    font-size: 0.88rem;
+  }
+}
+
 @media (max-width: 430px) {
   .app-header {
     align-items: center;

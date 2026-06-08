@@ -29,6 +29,10 @@ function hasReservedModifier(event: KeyboardEvent): boolean {
 }
 
 function isIgnoredTarget(target: EventTarget | null): boolean {
+  if (document.querySelector('[aria-modal="true"]') !== null) {
+    return true;
+  }
+
   if (!(target instanceof Element)) {
     return false;
   }
@@ -36,7 +40,7 @@ function isIgnoredTarget(target: EventTarget | null): boolean {
   return (
     (target instanceof HTMLElement && target.isContentEditable) ||
     target.closest(
-      'input, textarea, select, button, a[href], [contenteditable], [role="button"], [role="textbox"]'
+      'input, textarea, select, a[href], [contenteditable], [role="textbox"], form button, form [role="button"]'
     ) !== null
   );
 }
