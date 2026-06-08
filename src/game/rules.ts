@@ -1,9 +1,134 @@
 import { BOARD_WIDTH, SCORE_BY_LINES, VISIBLE_QUEUE_SIZE, getGravityMs } from './constants';
 import { clearFullLines, createEmptyBoard, isValidPosition, mergePiece } from './board';
 import { createPieceStream, drawPieceFromStream } from './random';
-import type { ActivePiece, GameAction, GameState, PieceStreamState, PieceType } from './types';
+import type {
+  ActivePiece,
+  GameAction,
+  GameState,
+  PieceStreamState,
+  PieceType,
+  Point
+} from './types';
 
-const WALL_KICK_OFFSETS = [0, -1, 1, -2, 2] as const;
+type RotationKey = '0>1' | '1>0' | '1>2' | '2>1' | '2>3' | '3>2' | '3>0' | '0>3';
+
+const JLSTZ_WALL_KICKS: Record<RotationKey, readonly Point[]> = {
+  '0>1': [
+    { x: 0, y: 0 },
+    { x: -1, y: 0 },
+    { x: -1, y: -1 },
+    { x: 0, y: 2 },
+    { x: -1, y: 2 }
+  ],
+  '1>0': [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: -2 },
+    { x: 1, y: -2 }
+  ],
+  '1>2': [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: -2 },
+    { x: 1, y: -2 }
+  ],
+  '2>1': [
+    { x: 0, y: 0 },
+    { x: -1, y: 0 },
+    { x: -1, y: -1 },
+    { x: 0, y: 2 },
+    { x: -1, y: 2 }
+  ],
+  '2>3': [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: -1 },
+    { x: 0, y: 2 },
+    { x: 1, y: 2 }
+  ],
+  '3>2': [
+    { x: 0, y: 0 },
+    { x: -1, y: 0 },
+    { x: -1, y: 1 },
+    { x: 0, y: -2 },
+    { x: -1, y: -2 }
+  ],
+  '3>0': [
+    { x: 0, y: 0 },
+    { x: -1, y: 0 },
+    { x: -1, y: 1 },
+    { x: 0, y: -2 },
+    { x: -1, y: -2 }
+  ],
+  '0>3': [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: -1 },
+    { x: 0, y: 2 },
+    { x: 1, y: 2 }
+  ]
+};
+
+const I_WALL_KICKS: Record<RotationKey, readonly Point[]> = {
+  '0>1': [
+    { x: 0, y: 0 },
+    { x: -2, y: 0 },
+    { x: 1, y: 0 },
+    { x: -2, y: -2 },
+    { x: 1, y: 1 }
+  ],
+  '1>0': [
+    { x: 0, y: 0 },
+    { x: 2, y: 0 },
+    { x: -1, y: 0 },
+    { x: 2, y: 2 },
+    { x: -1, y: -1 }
+  ],
+  '1>2': [
+    { x: 0, y: 0 },
+    { x: -1, y: 0 },
+    { x: 2, y: 0 },
+    { x: -1, y: 2 },
+    { x: 2, y: -1 }
+  ],
+  '2>1': [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: -2, y: 0 },
+    { x: 1, y: -2 },
+    { x: -2, y: 1 }
+  ],
+  '2>3': [
+    { x: 0, y: 0 },
+    { x: 2, y: 0 },
+    { x: -1, y: 0 },
+    { x: 2, y: 2 },
+    { x: -1, y: -1 }
+  ],
+  '3>2': [
+    { x: 0, y: 0 },
+    { x: -2, y: 0 },
+    { x: 1, y: 0 },
+    { x: -2, y: -2 },
+    { x: 1, y: 1 }
+  ],
+  '3>0': [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: -2, y: 0 },
+    { x: 1, y: -2 },
+    { x: -2, y: 1 }
+  ],
+  '0>3': [
+    { x: 0, y: 0 },
+    { x: -1, y: 0 },
+    { x: 2, y: 0 },
+    { x: -1, y: 2 },
+    { x: 2, y: -1 }
+  ]
+};
 
 interface PulledPiece {
   piece: PieceType;
@@ -33,6 +158,20 @@ function drawPieces(
 
 function normalizeRotation(rotation: number): number {
   return ((rotation % 4) + 4) % 4;
+}
+
+function getRotationKey(from: number, to: number): RotationKey {
+  return `${from}>${to}` as RotationKey;
+}
+
+function getWallKickOffsets(type: PieceType, from: number, to: number): readonly Point[] {
+  if (type === 'O') {
+    return [{ x: 0, y: 0 }];
+  }
+
+  return type === 'I'
+    ? I_WALL_KICKS[getRotationKey(from, to)]
+    : JLSTZ_WALL_KICKS[getRotationKey(from, to)];
 }
 
 function spawnPiece(type: PieceType): ActivePiece {
@@ -121,14 +260,16 @@ function moveBy(state: GameState, dx: number, dy: number): GameState {
 }
 
 function rotateBy(state: GameState, direction: -1 | 1): GameState {
-  const rotation = normalizeRotation(state.active.rotation + direction);
+  const from = normalizeRotation(state.active.rotation);
+  const rotation = normalizeRotation(from + direction);
 
-  for (const dx of WALL_KICK_OFFSETS) {
+  for (const offset of getWallKickOffsets(state.active.type, from, rotation)) {
     const active = {
       ...state.active,
       position: {
         ...state.active.position,
-        x: state.active.position.x + dx
+        x: state.active.position.x + offset.x,
+        y: state.active.position.y + offset.y
       },
       rotation
     };

@@ -221,6 +221,22 @@ describe('game reducer rules', () => {
     expect(rotated.active.rotation).toBe(2);
   });
 
+  it('uses SRS vertical kick order when rotating around blockers', () => {
+    const board = createEmptyBoard();
+    board[2][4] = 'O';
+    board[1][4] = 'O';
+    const playing = {
+      ...gameReducer(createInitialState(1), { type: 'start' }),
+      board,
+      active: { type: 'T' as const, position: { x: 4, y: 1 }, rotation: 0 }
+    };
+
+    const rotated = gameReducer(playing, { type: 'rotate', direction: 1 });
+
+    expect(rotated.active.position).toEqual({ x: 3, y: 0 });
+    expect(rotated.active.rotation).toBe(1);
+  });
+
   it('normalizes stored rotation values', () => {
     const playing = gameReducer(createInitialState(1), { type: 'start' });
     const rotated = gameReducer(playing, { type: 'rotate', direction: -1 });
