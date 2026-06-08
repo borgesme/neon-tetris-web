@@ -30,17 +30,61 @@ describe('final interaction regressions', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'move', dx: -1 });
   });
 
-  test('primary game panel actions move focus away after activation', () => {
+  test('Space keeps native and ARIA button activation available', () => {
     const dispatch = vi.fn((_: GameAction) => undefined);
 
-    render(<GamePanel state={createInitialState(1)} dispatch={dispatch} />);
+    function Harness() {
+      useKeyboardControls({ phase: 'playing', dispatch });
+      return (
+        <>
+          <button type="button">Scores</button>
+          <span role="button" tabIndex={0}>
+            Custom button
+          </span>
+        </>
+      );
+    }
+
+    render(<Harness />);
+
+    for (const button of [
+      screen.getByRole('button', { name: 'Scores' }),
+      screen.getByRole('button', { name: 'Custom button' })
+    ]) {
+      button.focus();
+      const event = new KeyboardEvent('keydown', {
+        key: ' ',
+        code: 'Space',
+        bubbles: true,
+        cancelable: true
+      });
+
+      button.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+    }
+
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  test('Start click blur allows the next game keyboard action', () => {
+    const dispatch = vi.fn((_: GameAction) => undefined);
+
+    function Harness() {
+      useKeyboardControls({ phase: 'playing', dispatch });
+      return <GamePanel state={createInitialState(1)} dispatch={dispatch} />;
+    }
+
+    render(<Harness />);
     const startButton = screen.getByRole('button', { name: 'Start' });
     startButton.focus();
 
     fireEvent.click(startButton);
+    fireEvent.keyDown(window, { key: 'ArrowLeft', code: 'ArrowLeft' });
 
     expect(dispatch).toHaveBeenCalledWith({ type: 'start' });
     expect(startButton).not.toBe(document.activeElement);
+    expect(dispatch).toHaveBeenCalledWith({ type: 'move', dx: -1 });
   });
 
   test('dialog Tab and Shift+Tab loop within modal controls', () => {

@@ -28,13 +28,22 @@ function hasReservedModifier(event: KeyboardEvent): boolean {
   return event.ctrlKey || event.metaKey || event.altKey;
 }
 
-function isIgnoredTarget(target: EventTarget | null): boolean {
+function isSpaceKey(event: KeyboardEvent): boolean {
+  return event.key === ' ' || event.code === 'Space';
+}
+
+function isIgnoredTarget(event: KeyboardEvent): boolean {
   if (document.querySelector('[aria-modal="true"]') !== null) {
     return true;
   }
 
+  const target = event.target;
   if (!(target instanceof Element)) {
     return false;
+  }
+
+  if (isSpaceKey(event) && target.closest('button, [role="button"]') !== null) {
+    return true;
   }
 
   return (
@@ -62,7 +71,7 @@ function getKeyboardAction(event: KeyboardEvent, phase: GamePhase): GameAction |
 export function useKeyboardControls({ phase, dispatch }: UseKeyboardControlsOptions) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (hasReservedModifier(event) || isIgnoredTarget(event.target)) {
+      if (hasReservedModifier(event) || isIgnoredTarget(event)) {
         return;
       }
 
