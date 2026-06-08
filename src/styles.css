@@ -1,3 +1,5 @@
+/* Base tokens and document defaults */
+
 :root {
   color-scheme: dark;
   --bg: #070a12;
@@ -70,6 +72,8 @@ button.primary {
   box-shadow: 0 0 22px rgba(34, 211, 238, 0.2);
 }
 
+/* App shell and header */
+
 .app-shell {
   width: min(1180px, 100%);
   min-height: 100vh;
@@ -134,6 +138,8 @@ button.primary {
   min-width: 0;
 }
 
+/* Board canvas */
+
 .board-frame {
   display: grid;
   justify-items: center;
@@ -150,6 +156,8 @@ button.primary {
   box-shadow: 0 0 30px rgba(34, 211, 238, 0.24);
   touch-action: none;
 }
+
+/* Side panel, previews, and controls */
 
 .game-panel {
   display: grid;
@@ -299,6 +307,8 @@ button.primary {
   min-width: 0;
 }
 
+/* Dialogs and settings */
+
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -396,6 +406,8 @@ button.primary {
 .volume-control input:disabled + span {
   opacity: 0.56;
 }
+
+/* Responsive layouts */
 
 @media (max-width: 720px) {
   .app-shell {
