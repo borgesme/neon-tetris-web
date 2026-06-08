@@ -22,6 +22,12 @@ const PHASE_TEXT: Record<GamePhase, string> = {
   gameOver: 'Game Over'
 };
 
+const SHARE_STATUS_TEXT = {
+  shared: 'Share dialog opened.',
+  copied: 'Score copied to clipboard.',
+  unsupported: 'Sharing is not supported in this browser.'
+} as const;
+
 interface GameSnapshot {
   game: ReturnType<typeof createInitialState>;
   lastAction: GameAction | null;
@@ -49,6 +55,7 @@ export default function App() {
   const [settings, setSettings] = useState(readSettings);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shareStatus, setShareStatus] = useState<keyof typeof SHARE_STATUS_TEXT | null>(null);
   const [leaderboardVersion, setLeaderboardVersion] = useState(0);
   const submittedScoreRef = useRef<string | null>(null);
   const state = snapshot.game;
@@ -103,12 +110,16 @@ export default function App() {
     setLeaderboardVersion((version) => version + 1);
   }, [state.bagSeed, state.phase, state.stats.level, state.stats.lines, state.stats.score]);
 
-  const currentScore = {
-    score: state.stats.score,
-    level: state.stats.level,
-    lines: state.stats.lines,
-    createdAt: new Date().toISOString()
-  };
+  const handleShare = useCallback(async () => {
+    const currentScore = {
+      score: state.stats.score,
+      level: state.stats.level,
+      lines: state.stats.lines,
+      createdAt: new Date().toISOString()
+    };
+    const result = await shareScore(currentScore);
+    setShareStatus(result);
+  }, [state.stats.level, state.stats.lines, state.stats.score]);
 
   return (
     <main className="app-shell">
@@ -127,10 +138,15 @@ export default function App() {
           <button type="button" onClick={() => setSettingsOpen(true)}>
             Settings
           </button>
-          <button type="button" onClick={() => void shareScore(currentScore)}>
+          <button type="button" onClick={() => void handleShare()}>
             Share
           </button>
           <PwaInstallButton />
+          {shareStatus && (
+            <p className="share-status" aria-live="polite">
+              {SHARE_STATUS_TEXT[shareStatus]}
+            </p>
+          )}
         </div>
       </header>
 
