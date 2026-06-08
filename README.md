@@ -68,6 +68,16 @@ pnpm.cmd preview
 pnpm.cmd test
 ```
 
+## 在线发布
+
+项目通过 GitHub Pages 发布为静态站点。仓库 Pages 设置中将 Build and deployment 的 Source 设为 `GitHub Actions` 后，推送到 `main` 会自动构建并发布 `dist`。
+
+在线地址：
+
+```text
+https://borgesme.github.io/neon-tetris-web/
+```
+
 ## 操作方式
 
 ### 键盘

@@ -16,10 +16,11 @@ export default defineConfig({
         theme_color: '#070a12',
         background_color: '#070a12',
         display: 'standalone',
-        start_url: '/',
+        start_url: './',
+        scope: './',
         icons: [
           {
-            src: '/icons/icon.svg',
+            src: 'icons/icon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any maskable'
