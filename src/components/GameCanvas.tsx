@@ -18,6 +18,25 @@ interface GameCanvasProps {
   state: GameState;
 }
 
+interface CanvasBackingStore {
+  width: number;
+  height: number;
+}
+
+export function syncCanvasBackingStore(
+  canvas: CanvasBackingStore,
+  backingWidth: number,
+  backingHeight: number
+): boolean {
+  if (canvas.width === backingWidth && canvas.height === backingHeight) {
+    return false;
+  }
+
+  canvas.width = backingWidth;
+  canvas.height = backingHeight;
+  return true;
+}
+
 function getCanvasMetrics(canvas: HTMLCanvasElement) {
   const rect = canvas.getBoundingClientRect();
   const pixelRatio = window.devicePixelRatio || 1;
@@ -87,8 +106,7 @@ function renderCanvas(canvas: HTMLCanvasElement, state: GameState) {
     return;
   }
 
-  canvas.width = backingWidth;
-  canvas.height = backingHeight;
+  syncCanvasBackingStore(canvas, backingWidth, backingHeight);
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
   const cellSize = Math.min(width / BOARD_WIDTH, height / BOARD_HEIGHT);
